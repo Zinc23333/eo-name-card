@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/node": "^20.19.25"
+  },
+  "dependencies": {
+    "pureimage": "^0.4.18"
+  }
+}
