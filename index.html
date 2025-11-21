@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姓名卡片生成器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .generated-image {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>姓名卡片生成器</h1>
+        <form id="nameForm">
+            <div class="form-group">
+                <label for="lastName">姓:</label>
+                <input type="text" id="lastName" name="lastName" placeholder="请输入姓氏" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="firstName">名:</label>
+                <input type="text" id="firstName" name="firstName" placeholder="请输入名字" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="color">颜色 (可选):</label>
+                <input type="color" id="color" name="color" value="#FFD700">
+            </div>
+            
+            <button type="submit">生成姓名卡片</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;">
+            <h2>生成结果</h2>
+            <img id="generatedImage" class="generated-image" alt="生成的姓名卡片">
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            正在生成中，请稍候...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('nameForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const lastName = document.getElementById('lastName').value;
+            const firstName = document.getElementById('firstName').value;
+            const color = document.getElementById('color').value.substring(1); // 移除 # 号
+            
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            try {
+                // 构建 API 请求 URL
+                const params = new URLSearchParams({
+                    lastName,
+                    firstName,
+                    ...(color && { color }) // 只有当颜色被设置时才添加
+                });
+                
+                const response = await fetch(`/api/generate?${params}`);
+                
+                if (response.ok) {
+                    // 将响应转换为 Blob 对象
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    
+                    // 显示生成的图像
+                    const imgElement = document.getElementById('generatedImage');
+                    imgElement.src = imageUrl;
+                    imgElement.onload = () => {
+                        URL.revokeObjectURL(imageUrl); // 清理内存
+                    };
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                // 显示错误信息
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').textContent = `发生错误: ${error.message}`;
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

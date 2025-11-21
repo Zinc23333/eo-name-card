@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姓名卡片接口测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .name-card {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .loading {
+            color: #007bff;
+            font-style: italic;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>姓名卡片接口测试</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>姓名卡片</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody id="testResults">
+            <!-- 测试结果将通过JavaScript动态插入 -->
+        </tbody>
+    </table>
+
+    <script>
+        // 测试用例数据
+        const testCases = [
+            { id: 1, japanese: "桜羽 エマ", roman: "Sakuraba Ema", chinese: "樱羽 艾玛" },
+            { id: 2, japanese: "二階堂 ヒロ", roman: "Nikaidou Hiro", chinese: "二阶堂 希罗" },
+            { id: 3, japanese: "夏目 アンアン", roman: "Natsume Anan", chinese: "夏目 安安" },
+            { id: 4, japanese: "城ケ崎ノア", roman: "Jougasaki Noa", chinese: "城崎 诺亚" },
+            { id: 5, japanese: "蓮見 レイア", roman: "Hasumi Reia", chinese: "莲见 蕾雅" },
+            { id: 6, japanese: "佐伯 ミリア", roman: "Saeki Miria", chinese: "佐伯 米莉亚" },
+            { id: 7, japanese: "宝生 マーゴ", roman: "Houshou Maago", chinese: "宝生 玛格" },
+            { id: 8, japanese: "黒部 ナノカ", roman: "Kurobe Nanoka", chinese: "黑部 奈叶香" },
+            { id: 9, japanese: "紫藤 アリサ", roman: "Shitou Arisa", chinese: "紫藤 亚里沙" },
+            { id: 10, japanese: "橘 シェリー", roman: "Tachibana Sherii", chinese: "橘 雪莉" },
+            { id: 11, japanese: "遠野 ハンナ", roman: "Toono Hanna", chinese: "远野 汉娜" },
+            { id: 12, japanese: "沢渡 ココ", roman: "Sawatari Koko", chinese: "泽渡 可可" },
+            { id: 13, japanese: "氷上 メルル", roman: "Hikami Meruru", chinese: "冰上 梅露露" }
+        ];
+
+        // 分离姓和名的辅助函数
+        function splitName(japanese, roman, chinese) {
+            // 日文姓名分离（假设第一部分是姓）
+            const japaneseParts = japanese.split(' ');
+            const lastNameJa = japaneseParts[0];
+            const firstNameJa = japaneseParts.slice(1).join(' ');
+
+            // 罗马音姓名分离（最后一个单词是名）
+            const romanParts = roman.split(' ');
+            const firstNameRo = romanParts.pop();
+            const lastNameRo = romanParts.join(' ');
+
+            // 中文姓名分离（第一个字符是姓）
+            const chineseParts = chinese.split(' ');
+            const lastNameCh = chineseParts[0];
+            const firstNameCh = chineseParts[1];
+
+            return {
+                japanese: { last: lastNameJa, first: firstNameJa },
+                roman: { last: lastNameRo, first: firstNameRo },
+                chinese: { last: lastNameCh, first: firstNameCh }
+            };
+        }
+
+        // 生成姓名卡片
+        async function generateNameCard(lastName, firstName) {
+            // 使用姓和名作为参数发送请求
+            const params = new URLSearchParams({
+                lastName: lastName,
+                firstName: firstName,
+                color: 'FFD700' // 金色
+            });
+
+            try {
+                const response = await fetch(`/api/generate?${params}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    return imageUrl;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                throw new Error(`请求失败: ${error.message}`);
+            }
+        }
+
+        // 渲染所有测试用例
+        async function renderTestCases() {
+            const tbody = document.getElementById('testResults');
+            
+            for (const testCase of testCases) {
+                const names = splitName(testCase.japanese, testCase.roman, testCase.chinese);
+                
+                // 创建表格行
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${testCase.id}</td>
+                    <td id="cards-${testCase.id}">
+                        <div class="loading">生成中...</div>
+                    </td>
+                    <td id="status-${testCase.id}">
+                        <div class="loading">请求中...</div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                try {
+                    // 为每种语言生成姓名卡片
+                    const japaneseImageUrl = await generateNameCard(names.japanese.last, names.japanese.first);
+                    const romanImageUrl = await generateNameCard(names.roman.last, names.roman.first);
+                    const chineseImageUrl = await generateNameCard(names.chinese.last, names.chinese.first);
+                    
+                    // 更新卡片显示
+                    document.getElementById(`cards-${testCase.id}`).innerHTML = `
+                        <div>
+                            <p><strong>日文:</strong></p>
+                            <img src="${japaneseImageUrl}" alt="日文姓名卡片" class="name-card">
+                            <p>${testCase.japanese}</p>
+                        </div>
+                        <div>
+                            <p><strong>罗马音:</strong></p>
+                            <img src="${romanImageUrl}" alt="罗马音姓名卡片" class="name-card">
+                            <p>${testCase.roman}</p>
+                        </div>
+                        <div>
+                            <p><strong>中文:</strong></p>
+                            <img src="${chineseImageUrl}" alt="中文姓名卡片" class="name-card">
+                            <p>${testCase.chinese}</p>
+                        </div>
+                    `;
+                    
+                    // 更新状态显示
+                    document.getElementById(`status-${testCase.id}`).innerHTML = 
+                        '<span style="color: green;">✓ 全部成功</span>';
+                } catch (error) {
+                    // 显示错误信息
+                    document.getElementById(`cards-${testCase.id}`).innerHTML = 
+                        '<div class="error">生成失败</div>';
+                    document.getElementById(`status-${testCase.id}`).innerHTML = 
+                        `<div class="error">✗ ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 页面加载完成后开始渲染测试用例
+        document.addEventListener('DOMContentLoaded', renderTestCases);
+    </script>
+</body>
+</html>
