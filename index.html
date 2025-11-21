@@ -10,17 +10,22 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-image: url('public/background.webp');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            color: #ffffff; /* 设置默认文字为白色 */
         }
         .container {
-            background-color: white;
+            background-color: rgba(0, 0, 0, 0.5);
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #ffffff; /* 标题文字改为白色 */
         }
         .form-group {
             margin-bottom: 20px;
@@ -29,6 +34,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #ffffff; /* 标签文字改为白色 */
         }
         input, button {
             width: 100%;
@@ -37,6 +43,13 @@
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
+        }
+        input {
+            background-color: rgba(255, 255, 255, 0.1); /* 输入框背景设为半透明 */
+            color: #ffffff; /* 输入框文字为白色 */
+        }
+        input::placeholder {
+            color: #cccccc; /* 占位符文字颜色 */
         }
         button {
             background-color: #007bff;
@@ -47,23 +60,89 @@
         button:hover {
             background-color: #0056b3;
         }
+        .preset-colors {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        .color-option.selected {
+            border-color: #ffffff; /* 选中边框改为白色 */
+            transform: scale(1.1);
+        }
+        .custom-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #cccccc;
+            color: #ffffff; /* 加号颜色为白色 */
+        }
         .result {
             margin-top: 30px;
             text-align: center;
+            padding: 20px;
+            border-radius: 10px;
         }
         .generated-image {
             max-width: 100%;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .actions {
+            margin-top: 15px;
+        }
+        .download-btn {
+            background-color: #28a745;
+        }
+        .download-btn:hover {
+            background-color: #218838;
+        }
+        .privacy-note {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #007bff;
+            font-size: 14px;
+            color: #ffffff; /* 隐私声明文字改为白色 */
+        }
+        .link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #ffffff69; /* 链接文字改为白色 */
+        }
+        .link a {
+            color: #ffffff69; /* 链接文字改为白色 */
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
         .error {
-            color: red;
+            color: #ff6b6b; /* 错误信息改为浅红色 */
             text-align: center;
             margin-top: 20px;
         }
         .loading {
             text-align: center;
-            color: #666;
+            color: #ffffff; /* 加载信息改为白色 */
         }
     </style>
 </head>
@@ -83,15 +162,34 @@
             
             <div class="form-group">
                 <label for="color">颜色 (可选):</label>
-                <input type="color" id="color" name="color" value="#FFD700">
+                <div class="preset-colors">
+                    <div class="color-option selected" style="background-color: #fd91af;" data-color="fd91af"></div>
+                    <div class="color-option" style="background-color: #ef4f54;" data-color="ef4f54"></div>
+                    <div class="color-option" style="background-color: #9f91fb;" data-color="9f91fb"></div>
+                    <div class="color-option" style="background-color: #68dfe7;" data-color="68dfe7"></div>
+                    <div class="color-option" style="background-color: #fdb158;" data-color="fdb158"></div>
+                    <div class="color-option" style="background-color: #ebcf8b;" data-color="ebcf8b"></div>
+                    <div class="color-option" style="background-color: #b97ceb;" data-color="b97ceb"></div>
+                    <div class="color-option" style="background-color: #838f93;" data-color="838f93"></div>
+                    <div class="color-option" style="background-color: #eb4b3c;" data-color="eb4b3c"></div>
+                    <div class="color-option" style="background-color: #89b1fb;" data-color="89b1fb"></div>
+                    <div class="color-option" style="background-color: #a9c71e;" data-color="a9c71e"></div>
+                    <div class="color-option" style="background-color: #fb724e;" data-color="fb724e"></div>
+                    <div class="color-option" style="background-color: #e3b9af;" data-color="e3b9af"></div>
+                    <div class="custom-color">+</div>
+                    <input type="color" id="colorPicker" style="display: none;" value="#fd91af">
+                </div>
             </div>
             
-            <button type="submit">生成姓名卡片</button>
+            <button type="submit">生成卡片</button>
         </form>
         
         <div id="result" class="result" style="display: none;">
             <h2>生成结果</h2>
             <img id="generatedImage" class="generated-image" alt="生成的姓名卡片">
+            <div class="actions">
+                <button id="downloadBtn" class="download-btn">下载图片</button>
+            </div>
         </div>
         
         <div id="loading" class="loading" style="display: none;">
@@ -99,16 +197,113 @@
         </div>
         
         <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="example" class="result">
+            <h2>示例图片</h2>
+            <img src="/public/example.webp" class="generated-image" alt="示例姓名卡片">
+        </div>
+        
+        <div class="privacy-note">
+            <strong>隐私声明：</strong>本网站不会存储您输入的任何数据，所有处理均在 EdgeOne 边缘函数上完成，您的数据不会被保存。
+        </div>
+        
+    </div>
+    <div class="link">
+        <a href="/test.html" target="_blank">测试页</a> • 
+        <a href="https://github.com/Zinc23333/eo-name-card" target="_blank">源代码</a>
     </div>
 
     <script>
+        // 保存当前生成的图片blob数据
+        let currentImageBlob = null;
+        
+        // 预设颜色选择功能
+        const colorOptions = document.querySelectorAll('.color-option');
+        const customColor = document.querySelector('.custom-color');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorInput = document.getElementById('colorPicker');
+        
+        colorOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除所有选项的选中状态
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                // 添加当前选项的选中状态
+                this.classList.add('selected');
+                // 更新隐藏的颜色选择器值
+                const color = this.getAttribute('data-color');
+                colorPicker.value = '#' + color;
+            });
+        });
+        
+        // 自定义颜色选择
+        customColor.addEventListener('click', function() {
+            colorPicker.click();
+        });
+        
+        // 当使用颜色选择器时更新界面
+        colorPicker.addEventListener('input', function() {
+            // 移除所有预设颜色的选中状态
+            colorOptions.forEach(opt => opt.classList.remove('selected'));
+            // 更新颜色值
+            const color = this.value.substring(1);
+            colorPicker.setAttribute('data-color', color);
+        });
+        
+        // 当颜色选择器关闭时（颜色选择完成），将新颜色添加到颜色列表中
+        colorPicker.addEventListener('change', function() {
+            const newColor = this.value.substring(1); // 移除 # 号
+            
+            // 检查该颜色是否已经存在于预设颜色中
+            let colorExists = false;
+            colorOptions.forEach(option => {
+                if (option.getAttribute('data-color').toUpperCase() === newColor.toUpperCase()) {
+                    colorExists = true;
+                    // 选中已存在的颜色
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                }
+            });
+            
+            // 如果颜色不存在，则添加新颜色到列表中
+            if (!colorExists) {
+                const presetColorsContainer = document.querySelector('.preset-colors');
+                const plusSign = document.querySelector('.custom-color');
+                
+                // 创建新的颜色选项
+                const newColorOption = document.createElement('div');
+                newColorOption.className = 'color-option selected';
+                newColorOption.style.backgroundColor = '#' + newColor;
+                newColorOption.setAttribute('data-color', newColor);
+                
+                // 插入到 "+" 号之前
+                presetColorsContainer.insertBefore(newColorOption, plusSign);
+                
+                // 为新颜色选项添加点击事件监听器
+                newColorOption.addEventListener('click', function() {
+                    // 移除所有选项的选中状态
+                    const allColorOptions = document.querySelectorAll('.color-option');
+                    allColorOptions.forEach(opt => opt.classList.remove('selected'));
+                    // 添加当前选项的选中状态
+                    this.classList.add('selected');
+                    // 更新颜色选择器的值
+                    colorPicker.value = '#' + newColor;
+                });
+                
+                // 移除其他选项的选中状态
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+            }
+        });
+        
         document.getElementById('nameForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // 隐藏示例图片
+            document.getElementById('example').style.display = 'none';
             
             // 获取表单数据
             const lastName = document.getElementById('lastName').value;
             const firstName = document.getElementById('firstName').value;
-            const color = document.getElementById('color').value.substring(1); // 移除 # 号
+            const color = colorPicker.value.substring(1); // 移除 # 号
             
             // 显示加载状态
             document.getElementById('loading').style.display = 'block';
@@ -126,8 +321,9 @@
                 const response = await fetch(`/api/generate?${params}`);
                 
                 if (response.ok) {
-                    // 将响应转换为 Blob 对象
+                    // 将响应转换为 Blob 对象并保存
                     const blob = await response.blob();
+                    currentImageBlob = blob; // 保存blob用于下载
                     const imageUrl = URL.createObjectURL(blob);
                     
                     // 显示生成的图像
@@ -149,6 +345,32 @@
                 document.getElementById('error').style.display = 'block';
             }
         });
+        
+        // 下载功能
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (!currentImageBlob) return;
+            
+            const lastName = document.getElementById('lastName').value;
+            const firstName = document.getElementById('firstName').value;
+            const fullName = lastName + firstName;
+            
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(currentImageBlob);
+            link.download = fullName + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href); // 清理内存
+        });
     </script>
+
+    <!-- 网站访问计数 -->
+    <script
+        id="counterscale-script"
+        data-site-id="manosaba-name-card"
+        src="https://counterscale.zinc233.top/tracker.js"
+        defer
+    ></script>
 </body>
 </html>
