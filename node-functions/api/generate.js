@@ -1,7 +1,5 @@
 import { generateNameImage, downloadAsset } from 'lib/gen.js';
 
-
-const __baseUrl = 'https://card.manosaba.zinc233.top';
 /**
  * @param {{ request: Request }} param0 - 传入的请求对象
  */
@@ -19,8 +17,8 @@ export default async function onRequest({ request }) {
         const lastNameFirstCharColor = colorHex ? `#${colorHex}` : null;
 
         // 2. 准备资源 (下载到 /tmp 目录)
-        const bgUrl = `${__baseUrl}/public/bg.png`;
-        const fontUrl = `${__baseUrl}/public/DreamHanSerifCN-W10.ttf`;
+        const bgUrl = `/public/bg.png`;
+        const fontUrl = `/public/DreamHanSerifCN-W10.ttf`;
         
         const tmpBgPath = '/tmp/bg.png';
         const tmpFontPath = '/tmp/ft.ttf';
